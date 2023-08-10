@@ -10,7 +10,7 @@ import java.io.ObjectOutputStream
 class FileHelper {
     private val filename = "listinfo.dat"
 
-    fun writeData(item: ArrayList<String>, context: Context){
+    fun writeData(item: MutableList<String>, context: Context){
         val fos: FileOutputStream = context.openFileOutput(filename, Context.MODE_PRIVATE)
         val oas = ObjectOutputStream(fos)
         oas.writeObject(item)
