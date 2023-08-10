@@ -12,7 +12,9 @@ import com.example.todolist.databinding.ListItemBinding
 class MainActivity : AppCompatActivity() {
     lateinit var listAdapter: DoListAdapter
     lateinit var mainBinding: ActivityMainBinding
-    var itemList = ArrayList<String>()
+    // Я позмінював ArrayList на MutableList, по суті це одне й те ж саме, але з MutableList працювати
+    // особисто мені легше, але під капотом там по суті тей же ArrayList
+    var itemList = mutableListOf<TodoItem>()
     var fileHelper = FileHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,16 +22,24 @@ class MainActivity : AppCompatActivity() {
         mainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mainBinding.root)
 
-        itemList = fileHelper.readData(applicationContext)
+        //Зчитуємо список з файлу та відразу його трансформуємо за допомогою map в масив з TodoItem
+        itemList = fileHelper.readData(applicationContext).map {
+            TodoItem(
+                it,
+                false
+            )
+        }.toMutableList()
         listAdapter = DoListAdapter(this@MainActivity, itemList, fileHelper)
 
         mainBinding.recyclerView.layoutManager = LinearLayoutManager(this)
         mainBinding.recyclerView.adapter = listAdapter
         mainBinding.button.setOnClickListener {
             val itemName: String = mainBinding.editText.text.toString()
-            itemList.add(itemName)
+            itemList.add(
+                TodoItem(itemName, false)
+            )
             mainBinding.editText.setText("")
-            fileHelper.writeData(itemList, applicationContext)
+            fileHelper.writeData(itemList.map { it.content }.toMutableList(), applicationContext)
             listAdapter.notifyItemInserted(itemList.size - 1)
         }
     }

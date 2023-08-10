@@ -11,8 +11,12 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-
-class DoListAdapter(var context: Context, var itemList: ArrayList<String>, var fileHelper: FileHelper):
+/*
+    Для того, щоб реалізувати цю логіку з прапорцями,
+    тобі потрібно при створенні нового item в todo створювати не просто новий string, а новий
+    обʼєкт в якому будуть 2 поля (TodoItem.kt). Та при зміні стану прапорця
+*/
+class DoListAdapter(var context: Context, var itemList: MutableList<TodoItem>, var fileHelper: FileHelper):
     RecyclerView.Adapter<DoListAdapter.DoListHolder>(){
 
     class DoListHolder(itemView: View): RecyclerView.ViewHolder(itemView){
@@ -33,36 +37,35 @@ class DoListAdapter(var context: Context, var itemList: ArrayList<String>, var f
 
     override fun onBindViewHolder(holder: DoListHolder, position: Int) {
         var buttonPressed = false
-        holder.task.text = itemList[position]
-        holder.priority.setImageResource(R.drawable.baseline_flag_unmarked)
-        holder.priority.setOnClickListener {  }
+        //Варто виносити вьюхи в окремі змінні для того, щоб було простіше читати код
+        val priorityBtn: ImageButton = holder.priority
+        val taskTextView: TextView = holder.task
+
+        taskTextView.text = itemList[position].content
+        //Ось тут при створенні чи оновленні елемента в recyclerview перевіряємо чи checked флажок
+        if (itemList[position].isChecked) {
+            priorityBtn.setImageResource(R.drawable.baseline_flag_marked)
+        } else {
+            priorityBtn.setImageResource(R.drawable.baseline_flag_unmarked)
+        }
         holder.isDone.setOnClickListener {
             if (holder.isDone.isChecked){
-                holder.task.paintFlags = holder.task.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            }else{
-                holder.task.paintFlags = 0
+                taskTextView.paintFlags = taskTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            } else {
+                taskTextView.paintFlags = 0
             }
         }
-        holder.priority.setOnClickListener {
-            buttonPressed = !buttonPressed
+        priorityBtn.setOnClickListener {
             val item = itemList[position]
-            if (buttonPressed){
-                holder.priority.setImageResource(R.drawable.baseline_flag_marked)
+            if (!item.isChecked){
                 itemList.remove(item)
                 notifyItemRemoved(holder.adapterPosition)
-                //notifyItemRangeChanged(holder.adapterPosition, itemList.size)
                 itemList.add(0, item)
-                holder.priority.setImageResource(R.drawable.baseline_flag_marked)
-                notifyItemInserted(0)
-                //notifyItemRangeChanged(0, itemList.size)
-            }else{
-                holder.priority.setImageResource(R.drawable.baseline_flag_unmarked)
-                itemList.remove(item)
-                notifyItemRemoved(holder.adapterPosition)
-                //notifyItemRangeChanged(0, itemList.size)
-                itemList.add(holder.oldPosition, item)
-                notifyItemInserted(holder.oldPosition)
-                //notifyItemRangeChanged(holder.oldPosition, itemList.size)
+                itemList[0].isChecked = true
+                notifyItemRangeChanged(0, itemList.size)
+            } else {
+                itemList[position].isChecked = false
+                notifyItemRangeChanged(0, itemList.size)
             }
         }
         holder.itemView.setOnClickListener {
@@ -78,7 +81,7 @@ class DoListAdapter(var context: Context, var itemList: ArrayList<String>, var f
                     itemList.removeAt(position)
                     notifyItemRemoved(holder.adapterPosition)
                     notifyItemRangeChanged(holder.adapterPosition, itemList.size)
-                    fileHelper.writeData(itemList, context)
+                    fileHelper.writeData(itemList.map { it.content }.toMutableList(), context)
                 }
                 .create()
                 .show()
