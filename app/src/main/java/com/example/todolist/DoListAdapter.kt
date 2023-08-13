@@ -11,11 +11,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-/*
-    Для того, щоб реалізувати цю логіку з прапорцями,
-    тобі потрібно при створенні нового item в todo створювати не просто новий string, а новий
-    обʼєкт в якому будуть 2 поля (TodoItem.kt). Та при зміні стану прапорця
-*/
+
 class DoListAdapter(var context: Context, var itemList: MutableList<TodoItem>, var fileHelper: FileHelper):
     RecyclerView.Adapter<DoListAdapter.DoListHolder>(){
 
@@ -36,13 +32,10 @@ class DoListAdapter(var context: Context, var itemList: MutableList<TodoItem>, v
     }
 
     override fun onBindViewHolder(holder: DoListHolder, position: Int) {
-        var buttonPressed = false
-        //Варто виносити вьюхи в окремі змінні для того, щоб було простіше читати код
         val priorityBtn: ImageButton = holder.priority
         val taskTextView: TextView = holder.task
 
         taskTextView.text = itemList[position].content
-        //Ось тут при створенні чи оновленні елемента в recyclerview перевіряємо чи checked флажок
         if (itemList[position].isChecked) {
             priorityBtn.setImageResource(R.drawable.baseline_flag_marked)
         } else {

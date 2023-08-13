@@ -18,16 +18,13 @@ class FileHelper {
     }
 
     fun readData(context: Context): ArrayList<String> {
-        val itemList: ArrayList<String>
-        itemList = try{
+        val itemList: ArrayList<String> = try{
             val fis: FileInputStream = context.openFileInput(filename)
             val ois = ObjectInputStream(fis)
             ois.readObject() as ArrayList<String>
         }catch (e: FileNotFoundException){
             ArrayList()
         }
-
-
         return itemList
     }
 }
